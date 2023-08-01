@@ -2,9 +2,11 @@ from rest_framework import status, permissions
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.generics import ListAPIView
 
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
+from .serializers import UserSerializer
 
 class UserRegistrationView(APIView):
     permission_classes = [permissions.AllowAny]
@@ -42,3 +44,7 @@ class UserLoginView(APIView):
                 return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response({'error': 'Invalid username or password'}, status=status.HTTP_401_UNAUTHORIZED)
+        
+class UserListView(ListAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
