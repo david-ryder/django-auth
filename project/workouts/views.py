@@ -1,13 +1,9 @@
 from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.generics import ListAPIView, RetrieveUpdateDestroyAPIView
-
-from django.contrib.auth.models import User
-from django.contrib.auth import authenticate
+from rest_framework.generics import ListAPIView
 from .serializers import *
 
 class CreateWorkoutView(APIView):
@@ -17,6 +13,15 @@ class CreateWorkoutView(APIView):
     def post(self, request):
         data = request.data
         data['user'] = request.user.id
+
+        # Check if 'name' exists in the request data
+        if 'name' not in data:
+            return Response({'error': 'Workout name is missing'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Check if 'exercises' list is empty
+        exercises = data.get('exercises', [])
+        if not exercises:
+            return Response({'error': 'Exercises are missing'}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             # Create new workout
@@ -51,22 +56,23 @@ class MyWorkoutsView(APIView):
         serializer = self.serializer_class(workouts, many=True)
         return Response(serializer.data)
     
-class WorkoutExercisesView(ListAPIView):
+class WorkoutExercisesView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
     serializer_class = ExerciseSerializer
 
-    def get_queryset(self):
+    def get(self, *args, **kwargs):
         workout_id = self.kwargs.get('workout_id', None)
         user_id = self.request.user.id
 
         try:
             exercises = Exercise.objects.filter(user_id=user_id, workout_id=workout_id)
-            return exercises
+            exercise_serializer = self.serializer_class(exercises, many=True)
+            return Response(exercise_serializer.data, status=status.HTTP_200_OK)
         except Workout.DoesNotExist:
-            return Exercise.objects.none()
+            return Response([], status=status.HTTP_200_OK)
         
-class WorkoutModifyView(RetrieveUpdateDestroyAPIView):
+class WorkoutUpdateDeleteView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
     serializer_class = WorkoutSerializer
@@ -107,7 +113,7 @@ class WorkoutModifyView(RetrieveUpdateDestroyAPIView):
                     return Response(exercise_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         return Response({'message': 'Workout modified successfully'})
     
-    def destroy(self, request, *args, **kwargs):
+    def delete(self, request, *args, **kwargs):
         workout_id = self.kwargs.get('workout_id', None)
         user_id = self.request.user.id
 
@@ -120,6 +126,41 @@ class WorkoutModifyView(RetrieveUpdateDestroyAPIView):
         workout.delete()
 
         return Response({'message': 'Workout and exercises deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+
+class SetsAPIView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        exercise_id = self.kwargs.get('exercise_id', None)
+
+        # Check if exercise_id is present
+        if exercise_id is None:
+            return Response({'error': 'exercise_id must be provided'}, status=status.HTTP_400_BAD_REQUEST)
+    
+        sets_data = request.data
+        
+        # Create sets for the exercise
+        sets_created = []
+        try:
+            exercise = Exercise.objects.get(id=exercise_id, user=request.user)  # Retrieve the exercise by ID and the current user
+        except Exercise.DoesNotExist:
+            return Response({'error': 'Exercise not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        for set_data in sets_data:
+            # Include the exercise ID and user ID in the set data
+            set_data['exercise'] = exercise.id
+            set_data['user'] = request.user.id
+
+            set_serializer = SetSerializer(data=set_data)
+            if set_serializer.is_valid():
+                set_serializer.save()
+                sets_created.append(set_serializer.data)
+            else:
+                return Response(set_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(sets_created, status=status.HTTP_201_CREATED)
+
+
 
 class WorkoutListAPIView(ListAPIView):
     queryset = Workout.objects.all()

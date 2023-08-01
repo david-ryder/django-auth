@@ -1,4 +1,6 @@
-from rest_framework import status, permissions, authentication
+from rest_framework.status import *
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -9,53 +11,53 @@ from django.contrib.auth import authenticate
 from .serializers import UserSerializer
 
 class UserRegistrationView(APIView):
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [AllowAny]
 
     def post(self, request):
         username = request.data.get('username')
         password = request.data.get('password')
 
         if not username or not password:
-            return Response({'error': 'Please provide username and password'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Please provide username and password'}, status=HTTP_400_BAD_REQUEST)
         
         try:
             user = User.objects.create_user(username=username, password=password)
             token, created = Token.objects.get_or_create(user=user)
-            return Response({'token': token.key}, status=status.HTTP_201_CREATED)
+            return Response({'token': token.key}, status=HTTP_201_CREATED)
         except Exception as e:
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': str(e)}, status=HTTP_400_BAD_REQUEST)
         
 class UserLoginView(APIView):
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [AllowAny]
 
     def post(self, request):
         username = request.data.get('username')
         password = request.data.get('password')
 
         if not username or not password:
-            return Response({'error': 'Please provide username and password'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Please provide username and password'}, status=HTTP_400_BAD_REQUEST)
         
         user = authenticate(username=username, password=password)
         if user is not None:
             try:
                 token, created = Token.objects.get_or_create(user=user)
-                return Response({'token': token.key}, status=status.HTTP_201_CREATED)
+                return Response({'token': token.key}, status=HTTP_201_CREATED)
             except Exception as e:
-                return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'error': str(e)}, status=HTTP_400_BAD_REQUEST)
         else:
-            return Response({'error': 'Invalid username or password'}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response({'error': 'Invalid username or password'}, status=HTTP_401_UNAUTHORIZED)
         
 class UserDeleteView(APIView):
-    authentication_classes = [authentication.TokenAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
 
     def delete(self, request):
         try:
             user = request.user
             user.delete()
-            return Response({'message': 'Account deleted successfully'}, status=status.HTTP_200_OK)
+            return Response({'message': 'Account deleted successfully'}, status=HTTP_200_OK)
         except Exception as e:
-            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({'error': str(e)}, status=HTTP_500_INTERNAL_SERVER_ERROR)
         
 class UserListView(ListAPIView):
     queryset = User.objects.all()
