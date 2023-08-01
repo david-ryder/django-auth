@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken',
-    'authentication',  # Add the 'authentication' app to the list of installed apps
+    'authentication',
+    'workouts',
 ]
 
 # Rest Framework Configuration
