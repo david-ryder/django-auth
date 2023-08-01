@@ -4,6 +4,8 @@ from .views import *
 urlpatterns = [
     path('create-workout/', CreateWorkoutView.as_view()),
     path('my-workouts/', MyWorkoutsView.as_view()),
-    path('list/<str:object_type>/', ObjectListAPIView.as_view()),
+    path('workouts-list/', WorkoutListAPIView.as_view()),
+    path('exercises-list/', ExerciseListAPIView.as_view()),
+    path('sets-list/', SetListAPIView.as_view()),
 ]
 

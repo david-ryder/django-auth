@@ -1,4 +1,4 @@
-from rest_framework import status, permissions
+from rest_framework import status, permissions, authentication
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -44,6 +44,18 @@ class UserLoginView(APIView):
                 return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response({'error': 'Invalid username or password'}, status=status.HTTP_401_UNAUTHORIZED)
+        
+class UserDeleteView(APIView):
+    authentication_classes = [authentication.TokenAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def delete(self, request):
+        try:
+            user = request.user
+            user.delete()
+            return Response({'message': 'Account deleted successfully'}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
 class UserListView(ListAPIView):
     queryset = User.objects.all()

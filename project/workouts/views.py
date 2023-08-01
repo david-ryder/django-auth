@@ -49,14 +49,14 @@ class MyWorkoutsView(APIView):
         serializer = self.serializer_class(workouts, many=True)
         return Response(serializer.data)
     
-class ObjectListAPIView(ListAPIView):
+class WorkoutListAPIView(ListAPIView):
+    queryset = Workout.objects.all()
     serializer_class = WorkoutSerializer
-    def get_queryset(self):
-        object_type = self.kwargs.get('object_type', None)
-        if object_type == 'workouts':
-            return Workout.objects.all()
-        elif object_type == 'exercises':
-            return Exercise.objects.all()
-        elif object_type == 'sets':
-            return Set.objects.all()
-        return None
+
+class ExerciseListAPIView(ListAPIView):
+    queryset = Exercise.objects.all()
+    serializer_class = WorkoutSerializer
+
+class SetListAPIView(ListAPIView):
+    queryset = Set.objects.all()
+    serializer_class = WorkoutSerializer
