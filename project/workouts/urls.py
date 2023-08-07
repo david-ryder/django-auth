@@ -6,7 +6,8 @@ urlpatterns = [
     path('my-workouts/', MyWorkoutsView.as_view(), name='get-my-workouts'),
     path('<int:workout_id>/exercises/', WorkoutExercisesView.as_view(), name='get-workout-exercises'),
     path('<int:workout_id>/modify/', WorkoutUpdateDeleteView.as_view(), name='modify-delete-workout'),
-    path('exercises/<int:exercise_id>/sets/', SetsAPIView.as_view(), name='create-sets'),
+    path('exercises/<int:exercise_id>/sets/', SetsAPIView.as_view(), name='create-get-sets'),
+    path('exercises/<int:exercise_id>/sets/<int:set_id>/', SetDeleteAPIView.as_view(), name='delete-set'),
 
     # Admin functions
     path('workouts-list/', WorkoutListAPIView.as_view(), name='workouts-list'),
