@@ -10,6 +10,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from .serializers import UserSerializer
 
+# Register a user for an account
 class UserRegistrationView(APIView):
     permission_classes = [AllowAny]
 
@@ -19,14 +20,16 @@ class UserRegistrationView(APIView):
 
         if not username or not password:
             return Response({'error': 'Please provide username and password'}, status=HTTP_400_BAD_REQUEST)
-        
+
         try:
-            user = User.objects.create_user(username=username, password=password)
+            user = User.objects.create_user(
+                username=username, password=password)
             token, created = Token.objects.get_or_create(user=user)
             return Response({'token': token.key}, status=HTTP_201_CREATED)
         except Exception as e:
             return Response({'error': str(e)}, status=HTTP_400_BAD_REQUEST)
-        
+
+# Log into user's account
 class UserLoginView(APIView):
     permission_classes = [AllowAny]
 
@@ -36,7 +39,7 @@ class UserLoginView(APIView):
 
         if not username or not password:
             return Response({'error': 'Please provide username and password'}, status=HTTP_400_BAD_REQUEST)
-        
+
         user = authenticate(username=username, password=password)
         if user is not None:
             try:
@@ -46,7 +49,8 @@ class UserLoginView(APIView):
                 return Response({'error': str(e)}, status=HTTP_400_BAD_REQUEST)
         else:
             return Response({'error': 'Invalid username or password'}, status=HTTP_401_UNAUTHORIZED)
-        
+
+# Delete user's account
 class UserDeleteView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
@@ -58,7 +62,8 @@ class UserDeleteView(APIView):
             return Response({'message': 'Account deleted successfully'}, status=HTTP_200_OK)
         except Exception as e:
             return Response({'error': str(e)}, status=HTTP_500_INTERNAL_SERVER_ERROR)
-        
+
+
 class UserListView(ListAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer

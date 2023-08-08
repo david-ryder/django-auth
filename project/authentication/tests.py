@@ -41,7 +41,8 @@ class UserRegistrationViewTest(APITestCase):
         user = User.objects.filter(username='testuser').first()
         self.assertIsNotNone(user)
         self.assertEqual(user.username, data['username'])  # Verify username
-        self.assertTrue(user.check_password(data['password']))  # Verify password
+        self.assertTrue(user.check_password(
+            data['password']))  # Verify password
 
     def test_missing_data(self):
         url = reverse('register-user')
