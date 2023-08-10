@@ -4,6 +4,9 @@ FROM python:3.9
 # Set the working directory in the container
 WORKDIR /app
 
+# Set PYTHONBUFFERED to ensure unbuffered mode for Python I/O
+ENV PYTHONBUFFERED 1
+
 # Copy the requirements file into the container at /app
 COPY requirements.txt /app/
 
