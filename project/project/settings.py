@@ -90,7 +90,7 @@ DATABASES = {
         'NAME': 'mydb',
         'USER': 'myuser',
         'PASSWORD': 'mypassword',
-        'HOST': 'db',  # This is the service name defined in docker-compose.yml
+        'HOST': 'postgres_db',  # This is the service name defined in docker-compose.yml
         'PORT': 5432,
     }
 }

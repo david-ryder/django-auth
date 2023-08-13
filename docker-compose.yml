@@ -1,7 +1,7 @@
 version: '3'
 
 services:
-  db:
+  postgres_db:
     image: postgres
     environment:
       POSTGRES_DB: mydb
@@ -10,7 +10,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  web:
+  django_app:
     build: .
     command: >
       bash -c "python manage.py migrate
@@ -20,7 +20,7 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      - db
+      - postgres_db
 
 volumes:
   postgres_data:
